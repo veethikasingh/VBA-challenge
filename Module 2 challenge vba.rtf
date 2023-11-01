@@ -1,0 +1,145 @@
+{\rtf1\ansi\ansicpg1252\cocoartf2757
+\cocoatextscaling0\cocoaplatform0{\fonttbl\f0\fswiss\fcharset0 Helvetica;}
+{\colortbl;\red255\green255\blue255;}
+{\*\expandedcolortbl;;}
+\margl1440\margr1440\vieww11520\viewh8400\viewkind0
+\pard\tx720\tx1440\tx2160\tx2880\tx3600\tx4320\tx5040\tx5760\tx6480\tx7200\tx7920\tx8640\pardirnatural\partightenfactor0
+
+\f0\fs24 \cf0 Sub ticker()\
+\
+\
+\
+For Each ws In Worksheets\
+\
+Dim i, j  As Integer\
+Dim Totalstock, x, k, z, y, n As Long\
+Dim nextrow, firstgrprow, lastgrprow, currentrow As Long\
+Dim currentstring, previoustring, nextstring, maxstock, worksheetName, begyear, endyear As String\
+Dim openbal, closebal, baldiff, perchg, maxchg, minchg As Double\
+'---------------------------------------------------------------------------------------\
+'initialize\
+\
+closebal = 0\
+openbal = 0\
+baldiff = 0\
+perchg = 0\
+Totalstock = 0\
+ \
+i = 1\
+j = 9\
+y = 2\
+\
+'Define column headers\
+\
+ws.Cells(i, j).Value = "Ticker"\
+j = j + 1\
+ws.Cells(i, j).Value = "Yearly Change"\
+\
+j = j + 1\
+ws.Cells(i, j).Value = "Percentage Change"\
+\
+j = j + 1\
+ws.Cells(i, j).Value = "Total Stock Volume"\
+ j = 9\
+\
+\
+  ' Find the last row of each worksheet\
+        ' Subtract one to return the number of rows without header\
+            lastrow = ws.Cells(Rows.Count, "A").End(xlUp).Row\
+       \
+ \
+'For each worksheet excluding header read the year\
+        worksheetName = ws.Name\
+       \
+        begyear = worksheetName & "0102"\
+        endyear = worksheetName & "1231"\
+   \
+'For ech row get the next row value to see if it is different\
+       \
+For x = 2 To lastrow\
+ \
+'store starting value of ticker\
+        'Current string\
+        currentstring = ws.Cells(x, 1).Value\
+      \
+       'previous counter and value\
+        z = x - 1\
+        previoustring = ws.Cells(z, 1).Value\
+     \
+       'next counter\
+        k = x + 1\
+        nextstring = ws.Cells(k, 1).Value\
+         \
+ ' get open balance at beginning of year\
+        If ws.Cells(x, 2).Value = begyear Then\
+            openbal = ws.Cells(x, 3).Value\
+        End If\
+  \
+  'Get closing balance at end of the year\
+        If ws.Cells(x, 2).Value = endyear Then\
+                 closebal = ws.Cells(x, 6).Value\
+                 baldiff = closebal - openbal\
+' Get percentage change\
+\
+                  If openbal <> 0 Then\
+                         perchg = (baldiff / openbal) * 100\
+                   End If\
+        End If\
+\
+ 'if current string is not equal to previous string then write the value to the new column\
+                If currentstring <> nextstring Then\
+                        Totalstock = Totalstock + ws.Cells(x, 7).Value\
+                ' write at column y and j\
+                        ws.Cells(y, j).Value = currentstring\
+                  'Sum the total stock volume for same rows\
+'write total volume bal diff and per chg\
+                        ws.Cells(y, j + 3).Value = Totalstock\
+        \
+                         ws.Cells(y, j + 1).Value = baldiff\
+    \
+                         ws.Cells(y, j + 2).Value = Round(perchg, 2)\
+'Format color\
+                If perchg >= 0 Then\
+                    ws.Cells(y, j + 2).Interior.Color = RGB(0, 300, 0)\
+                Else\
+                    ws.Cells(y, j + 2).Interior.Color = RGB(300, 0, 0)\
+                End If\
+    \
+   ' for next row in summary column\
+                     y = y + 1\
+        \
+                    Totalstock = 0\
+     \
+    Else\
+  ' keep adding stock volume until end of group\
+        Totalstock = Totalstock + ws.Cells(x, 7).Value\
+   \
+    \
+ End If\
+\
+    Next x\
+    \
+  \
+ ' Write Summary values\
+ \
+            maxchg = WorksheetFunction.Max(ws.Columns("K"))\
+           ws.Cells(2, 14).Value = "Greatest % increase"\
+            ws.Cells(2, 15).Value = maxchg\
+    \
+            minchg = WorksheetFunction.Min(ws.Columns("K"))\
+            ws.Cells(3, 14).Value = "Greatest % decrease"\
+            ws.Cells(3, 15).Value = minchg\
+    \
+            ws.Cells(4, 14).Value = "Greatest total volume"\
+            maxstock = WorksheetFunction.Max(ws.Columns("L"))\
+            ws.Cells(4, 15).Value = maxstock\
+     \
+\
+Next ws\
+\
+\
+\
+\
+End Sub\
+\
+}
